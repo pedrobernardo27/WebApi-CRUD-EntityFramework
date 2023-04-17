@@ -19,7 +19,7 @@ namespace CRUDWebApiEntityFramework.Controllers
             _pessoaService = pessoaService;
         }
 
-        [HttpGet("ListarPessoa")] 
+        [HttpGet("listarPessoa")] 
         public async ValueTask<IActionResult> BuscarPessoa()
         {
             try
@@ -33,7 +33,7 @@ namespace CRUDWebApiEntityFramework.Controllers
             }
         }
 
-        [HttpGet("ListarPessoaCompleto")]
+        [HttpGet("listarPessoaCompleto")]
         public async Task<IActionResult> ListarPessoa()
         {
             try
@@ -47,7 +47,7 @@ namespace CRUDWebApiEntityFramework.Controllers
             }
         }
 
-        [HttpPost("CriarPessoa")]
+        [HttpPost("criarPessoa")]
         public async ValueTask<IActionResult> CriarPessoa([FromBody] PessoaRequest pessoaRequest)
         {
             try

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using CRUDWebApiEntityFramework.Validação;
 using CRUDWebApiEntityFrameworkRepository.Models;
 using CRUDWebApiEntityFrameworkService.Interfaces;
 using CRUDWebApiEntityFrameworkRepository.Interfaces;
@@ -10,11 +11,11 @@ namespace CRUDWebApiEntityFrameworkService.Services
         private readonly ILogger<PessoaService> _logger;
         private readonly IPessoaRepository _pessoaRepository;
 
-        public PessoaService(ILogger<PessoaService> logger, IPessoaRepository pessoaRepository)
+        public PessoaService(ILogger<PessoaService> logger, CRUDWebApiEntityFrameworkRepository.Interfaces.IPessoaRepository pessoaRepository)
         {
             _logger = logger;
             _pessoaRepository = pessoaRepository;
-        }        
+        }
 
         public async ValueTask<IEnumerable<PessoaListarResponse>> ListarPessoas()
         {
@@ -35,7 +36,7 @@ namespace CRUDWebApiEntityFrameworkService.Services
                             Cpf = pessoa.Cpf,
                             Idade = pessoa.Idade,
                             Nome = pessoa.Nome,
-                            Sobrenome = pessoa.Sobrenome,                           
+                            Sobrenome = pessoa.Sobrenome,
                         };
 
                         lstPessoas.Add(novaPessoa);
@@ -115,17 +116,26 @@ namespace CRUDWebApiEntityFrameworkService.Services
             {
                 _logger.LogInformation("Inicio do método InserirPessoa");
 
+                var cpf = new ValidaCpf();
                 var novaPessoa = new Pessoa();
                 novaPessoa.Nome = pessoa.Nome;
                 novaPessoa.Sobrenome = pessoa.Sobrenome;
                 novaPessoa.Idade = pessoa.Idade;
                 novaPessoa.Cpf = pessoa.Cpf;
-
-                var resultPessoa = await _pessoaRepository.Inserir(novaPessoa);
-
-                if (resultPessoa != null)
+                                
+                if (cpf.ValCpf(pessoa.Cpf))
                 {
-                    novaPessoa = (Pessoa)resultPessoa;
+                    var resultPessoa = await _pessoaRepository.Inserir(novaPessoa);
+
+                    if (resultPessoa != null)
+                    {
+                        novaPessoa = (Pessoa)resultPessoa;
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("Cpf Inválido.");
+                    throw new Exception("Cpf Inválido.");
                 }
 
                 _logger.LogInformation("Fim do método InserirPessoa");
@@ -134,8 +144,8 @@ namespace CRUDWebApiEntityFrameworkService.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Erro ao afetuar InserirPessoa. {ex.Message}");
-                throw new Exception($"Erro ao afetuar InserirPessoa. {ex.Message}");
+                _logger.LogError($"Erro ao afetuar método InserirPessoa. {ex.Message}");
+                throw new Exception($"Erro ao afetuar método InserirPessoa. {ex.Message}");
             }
         }
         public async ValueTask<Pessoa> AlterarPessoa(PessoaAtualizarRequest pessoaAtualizarRequest)
@@ -207,6 +217,7 @@ namespace CRUDWebApiEntityFrameworkService.Services
                 _logger.LogError($"Erro ao efetuar ExcluirPessoa. {ex.Message}");
                 throw new Exception($"Erro ao efetuar ExcluirPessoa. {ex.Message}");
             }
-        }
+        }        
     }
 }
+
