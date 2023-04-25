@@ -8,6 +8,7 @@ namespace CRUDWebApiEntityFrameworkRepository.Context
 {
     public class EfExercicioModelContext : DbContext
     {
+        public DbSet<Endereco> Endereco { get; set; }
         public DbSet<Email> Email { get; set; }
         public DbSet<Pessoa> Pessoa { get; set; }
 
@@ -15,6 +16,12 @@ namespace CRUDWebApiEntityFrameworkRepository.Context
         {
             modelBuilder.Entity<Pessoa>()
                 .HasMany(e => e.Email)
+                .WithOne(e => e.Pessoa)
+                .HasForeignKey(e => e.Id_Pessoa)
+                .HasPrincipalKey(e => e.Id);
+
+            modelBuilder.Entity<Pessoa>()
+                .HasMany(e => e.Endereco)
                 .WithOne(e => e.Pessoa)
                 .HasForeignKey(e => e.Id_Pessoa)
                 .HasPrincipalKey(e => e.Id);

@@ -10,6 +10,7 @@ namespace CRUDWebApiEntityFrameworkService.Mapper
             CreateMap<EmailRequest, Email>();
             CreateMap<PessoaRequest, Pessoa>();
             CreateMap<PessoaAtualizarRequest, Pessoa>();
+            CreateMap<EnderecoRequest, Endereco>();
         }
     }
 
@@ -20,6 +21,7 @@ namespace CRUDWebApiEntityFrameworkService.Mapper
             CreateMap<Email, EmailRequest>();
             CreateMap<Pessoa, PessoaRequest>();
             CreateMap<Pessoa, PessoaAtualizarRequest>();
+            CreateMap<Endereco, EnderecoRequest>();
         }
     }
 }

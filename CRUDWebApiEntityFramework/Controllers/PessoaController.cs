@@ -84,8 +84,8 @@ namespace CRUDWebApiEntityFramework.Controllers
                 if (String.IsNullOrEmpty(pessoarRequest.Cpf))
                     return BadRequest();
 
-                var pessoas = await _pessoaService.AlterarPessoa(pessoarRequest);
-                return pessoas != null ? Ok(pessoas) : BadRequest();
+                var retorno = await _pessoaService.AlterarPessoa(pessoarRequest);
+                return retorno != null ? Ok(retorno) : BadRequest();
             }
             catch (Exception ex)
             {

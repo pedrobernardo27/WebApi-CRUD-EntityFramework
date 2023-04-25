@@ -13,14 +13,17 @@ namespace CRUDWebApiEntityFrameworkService.Services
         private readonly ILogger<PessoaService> _logger;
         private readonly IPessoaRepository _pessoaRepository;
         private readonly IEmailRepository _emailRepository;
+        private readonly IEnderecoRepository _enderecoRepository;
 
-        public PessoaService(ILogger<PessoaService> logger, 
-            IPessoaRepository pessoaRepository, IMapper mapper, IEmailRepository emailRepository)
+        public PessoaService(ILogger<PessoaService> logger,
+            IPessoaRepository pessoaRepository, IMapper mapper,
+            IEmailRepository emailRepository, IEnderecoRepository enderecoRepository)
         {
             _mapper = mapper;
             _logger = logger;
             _pessoaRepository = pessoaRepository;
             _emailRepository = emailRepository;
+            _enderecoRepository = enderecoRepository;
         }
 
         public async ValueTask<IEnumerable<PessoaListarResponse>> ListarPessoas()
@@ -123,8 +126,8 @@ namespace CRUDWebApiEntityFrameworkService.Services
                 _logger.LogInformation("Inicio do método InserirPessoa");
 
                 var cpf = new ValidaCpf();
-                var novaPessoa = _mapper.Map<Pessoa>(pessoa);                
-                                
+                var novaPessoa = _mapper.Map<Pessoa>(pessoa);
+
                 if (cpf.ValCpf(pessoa.Cpf))
                 {
                     var resultPessoa = await _pessoaRepository.Inserir(novaPessoa);
@@ -150,7 +153,7 @@ namespace CRUDWebApiEntityFrameworkService.Services
                 throw new Exception($"Erro ao afetuar método InserirPessoa. {ex.Message}");
             }
         }
-        public async ValueTask<Pessoa> AlterarPessoa(PessoaAtualizarRequest pessoaRequest)
+        public async ValueTask<String> AlterarPessoa(PessoaAtualizarRequest pessoaRequest)
         {
             try
             {
@@ -158,27 +161,29 @@ namespace CRUDWebApiEntityFrameworkService.Services
 
                 var pessoaResult = new Pessoa();
                 var pessoaValidado = await _pessoaRepository.ObterPessoaId(pessoaRequest.Id);
-                var emailValido = await _emailRepository.ObterEmailPorIdPessoa(pessoaRequest.Id);
+                var emailValidado = await _emailRepository.ObterEmailPorIdPessoa(pessoaRequest.Id);
+                var enderecoValidado = await _enderecoRepository.ObterEnderecoPorIdPessoa(pessoaRequest.Id);
 
-                if (pessoaValidado != null && emailValido != null)
-                {                    
+                if (pessoaValidado != null && emailValidado != null && enderecoValidado != null)
+                {
                     pessoaValidado = _mapper.Map<Pessoa>(pessoaRequest);
                     var resultPessoa = await _pessoaRepository.Atualizar(pessoaValidado);
 
                     var emailMapeado = _mapper.Map<Email>(pessoaRequest.Email.FirstOrDefault());
-                    emailMapeado.Id = emailValido.Id;
-                    emailMapeado.Id_Pessoa = emailValido.Id_Pessoa;
+                    emailMapeado.Id = emailValidado.Id;
+                    emailMapeado.Id_Pessoa = emailValidado.Id_Pessoa;
                     var resultEmail = await _emailRepository.AtualizarEmail(emailMapeado);
 
-                    if (resultPessoa != null)
-                    {
-                        pessoaResult = resultPessoa;
-                    }
+                    var enderecoMapeado = _mapper.Map<Endereco>(pessoaRequest.Endereco.FirstOrDefault());
+                    enderecoMapeado.Id = enderecoValidado.Id;
+                    enderecoMapeado.Id_Pessoa = enderecoValidado.Id_Pessoa;
+                    var resultEndereco = await _enderecoRepository.AtualizarEndereco(enderecoMapeado);
+
+                    pessoaResult = resultPessoa;
                 }
                 _logger.LogInformation("Fim do método AlterarEndereco");
 
-
-                return pessoaResult;
+                return "Atualizado com sucesso.";
             }
             catch (Exception ex)
             {
@@ -220,7 +225,7 @@ namespace CRUDWebApiEntityFrameworkService.Services
                 _logger.LogError($"Erro ao efetuar ExcluirPessoa. {ex.Message}");
                 throw new Exception($"Erro ao efetuar ExcluirPessoa. {ex.Message}");
             }
-        }        
+        }
     }
 }
 

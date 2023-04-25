@@ -13,5 +13,6 @@ namespace CRUDWebApiEntityFrameworkRepository.Models
         public int Idade { get; set; }
         public string Cpf { get; set; }
         public virtual ICollection<EmailRequest>? Email { get; set; }
+        public virtual ICollection<EnderecoRequest> Endereco { get; set; }
     }
 }

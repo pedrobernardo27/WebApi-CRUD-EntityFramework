@@ -13,6 +13,7 @@ public static class DatabaseExtensions
 
         services.AddTransient<IEmailRepository, EmailRepository>();
         services.AddTransient<IPessoaRepository, PessoaRepository>();
+        services.AddTransient<IEnderecoRepository, EnderecoRepository>();
 
         return services;
     }
