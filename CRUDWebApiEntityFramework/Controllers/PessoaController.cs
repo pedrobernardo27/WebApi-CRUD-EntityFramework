@@ -62,7 +62,7 @@ namespace CRUDWebApiEntityFramework.Controllers
                     return BadRequest();
 
                 var pessoas = await _pessoaService.InserirPessoa(pessoaRequest);
-                return pessoas != null ? Ok(pessoas) : BadRequest();
+                return pessoas != null ? Ok($"Pessoa cadastrada com sucesso") : BadRequest();
             }
             catch (Exception ex)
             {
@@ -71,20 +71,20 @@ namespace CRUDWebApiEntityFramework.Controllers
         }
 
         [HttpPut("atualizarPessoa")]
-        public async ValueTask<IActionResult> AtualizarPessoa([FromBody] PessoaAtualizarRequest pessoaAtualizarRequest)
+        public async ValueTask<IActionResult> AtualizarPessoa([FromBody] PessoaAtualizarRequest pessoarRequest)
         {
             try
             {
-                if (String.IsNullOrEmpty(pessoaAtualizarRequest.Nome))
+                if (String.IsNullOrEmpty(pessoarRequest.Nome))
                     return BadRequest();
-                if (String.IsNullOrEmpty(pessoaAtualizarRequest.Sobrenome))
+                if (String.IsNullOrEmpty(pessoarRequest.Sobrenome))
                     return BadRequest();
-                if (pessoaAtualizarRequest.Idade <= 0)
+                if (pessoarRequest.Idade <= 0)
                     return BadRequest();
-                if (String.IsNullOrEmpty(pessoaAtualizarRequest.Cpf))
+                if (String.IsNullOrEmpty(pessoarRequest.Cpf))
                     return BadRequest();
 
-                var pessoas = await _pessoaService.AlterarPessoa(pessoaAtualizarRequest);
+                var pessoas = await _pessoaService.AlterarPessoa(pessoarRequest);
                 return pessoas != null ? Ok(pessoas) : BadRequest();
             }
             catch (Exception ex)

@@ -1,4 +1,5 @@
-﻿using CRUDWebApiEntityFrameworkRepository.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using CRUDWebApiEntityFrameworkRepository.Models;
 using CRUDWebApiEntityFrameworkRepository.Context;
 using CRUDWebApiEntityFrameworkService.Interfaces;
 
@@ -33,11 +34,45 @@ namespace CRUDWebApiEntityFrameworkRepository.Repository
                 }
 
                 return lstEmail;
+
             }
             catch (Exception ex)
             {
                 throw new Exception($"Erro.{ex.Message}");
             }
+        }
+
+        public async ValueTask<Email> ObterEmailPorIdPessoa(int id)
+        {
+            var email = new Email();
+
+            using (var db = new EfExercicioModelContext())
+            {
+                email = await db.Email.FirstOrDefaultAsync(x => x.Id_Pessoa == id);
+            }
+
+            return email;
+        }
+
+        public async ValueTask<Email> AtualizarEmail(Email email)
+        {
+            try
+            {
+                using (var db = new EfExercicioModelContext())
+                {
+                    db.Entry(email).State = EntityState.Modified;
+
+                    await db.SaveChangesAsync();
+                }
+
+                return email;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception($"Erro.{ex.Message}");
+            }
+            
         }
     }
 }

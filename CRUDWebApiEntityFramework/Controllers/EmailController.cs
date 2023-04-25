@@ -29,6 +29,6 @@ namespace CRUDWebApiEntityFramework.Controllers
             {
                 throw new Exception($"Erro ao efetuar a pesquisa. {ex.Message}");
             }
-        }
+        }        
     }
 }

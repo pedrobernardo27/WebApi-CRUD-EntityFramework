@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using CRUDWebApiEntityFramework.Validação;
 using CRUDWebApiEntityFrameworkRepository.Models;
 using CRUDWebApiEntityFrameworkService.Interfaces;
@@ -8,13 +9,18 @@ namespace CRUDWebApiEntityFrameworkService.Services
 {
     public class PessoaService : IPessoaService
     {
+        private readonly IMapper _mapper;
         private readonly ILogger<PessoaService> _logger;
         private readonly IPessoaRepository _pessoaRepository;
+        private readonly IEmailRepository _emailRepository;
 
-        public PessoaService(ILogger<PessoaService> logger, CRUDWebApiEntityFrameworkRepository.Interfaces.IPessoaRepository pessoaRepository)
+        public PessoaService(ILogger<PessoaService> logger, 
+            IPessoaRepository pessoaRepository, IMapper mapper, IEmailRepository emailRepository)
         {
+            _mapper = mapper;
             _logger = logger;
             _pessoaRepository = pessoaRepository;
+            _emailRepository = emailRepository;
         }
 
         public async ValueTask<IEnumerable<PessoaListarResponse>> ListarPessoas()
@@ -117,11 +123,7 @@ namespace CRUDWebApiEntityFrameworkService.Services
                 _logger.LogInformation("Inicio do método InserirPessoa");
 
                 var cpf = new ValidaCpf();
-                var novaPessoa = new Pessoa();
-                novaPessoa.Nome = pessoa.Nome;
-                novaPessoa.Sobrenome = pessoa.Sobrenome;
-                novaPessoa.Idade = pessoa.Idade;
-                novaPessoa.Cpf = pessoa.Cpf;
+                var novaPessoa = _mapper.Map<Pessoa>(pessoa);                
                                 
                 if (cpf.ValCpf(pessoa.Cpf))
                 {
@@ -148,32 +150,33 @@ namespace CRUDWebApiEntityFrameworkService.Services
                 throw new Exception($"Erro ao afetuar método InserirPessoa. {ex.Message}");
             }
         }
-        public async ValueTask<Pessoa> AlterarPessoa(PessoaAtualizarRequest pessoaAtualizarRequest)
+        public async ValueTask<Pessoa> AlterarPessoa(PessoaAtualizarRequest pessoaRequest)
         {
             try
             {
                 _logger.LogInformation("Inicio do método AlterarPessoa");
 
                 var pessoaResult = new Pessoa();
-                var pessoaValidado = await _pessoaRepository.ObterPorId(pessoaAtualizarRequest.Id);
+                var pessoaValidado = await _pessoaRepository.ObterPessoaId(pessoaRequest.Id);
+                var emailValido = await _emailRepository.ObterEmailPorIdPessoa(pessoaRequest.Id);
 
-                if (pessoaValidado != null)
-                {
-                    pessoaValidado.Id = pessoaAtualizarRequest.Id;
-                    pessoaValidado.Nome = pessoaAtualizarRequest.Nome;
-                    pessoaValidado.Sobrenome = pessoaAtualizarRequest.Sobrenome;
-                    pessoaValidado.Idade = pessoaAtualizarRequest.Idade;
-                    pessoaValidado.Cpf = pessoaAtualizarRequest.Cpf;
-
+                if (pessoaValidado != null && emailValido != null)
+                {                    
+                    pessoaValidado = _mapper.Map<Pessoa>(pessoaRequest);
                     var resultPessoa = await _pessoaRepository.Atualizar(pessoaValidado);
+
+                    var emailMapeado = _mapper.Map<Email>(pessoaRequest.Email.FirstOrDefault());
+                    emailMapeado.Id = emailValido.Id;
+                    emailMapeado.Id_Pessoa = emailValido.Id_Pessoa;
+                    var resultEmail = await _emailRepository.AtualizarEmail(emailMapeado);
 
                     if (resultPessoa != null)
                     {
                         pessoaResult = resultPessoa;
                     }
                 }
-
                 _logger.LogInformation("Fim do método AlterarEndereco");
+
 
                 return pessoaResult;
             }
@@ -191,7 +194,7 @@ namespace CRUDWebApiEntityFrameworkService.Services
                 _logger.LogInformation("Inicio do método ExcluirPessoa");
 
                 var pessoaResult = new Pessoa();
-                var pessoaValidado = await _pessoaRepository.ObterPorId(id);
+                var pessoaValidado = await _pessoaRepository.ObterPessoaId(id);
 
                 if (pessoaValidado != null)
                 {

@@ -10,5 +10,6 @@ namespace CRUDWebApiEntityFrameworkRepository.Models
         public string Sobrenome { get; set; }
         public int Idade { get; set; }
         public string Cpf { get; set; }
+        public virtual ICollection<EmailRequest>? Email { get; set; }
     }
 }

@@ -1,16 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Text.Json.Serialization;
 
 namespace CRUDWebApiEntityFrameworkRepository.Models
-{
-    [Table("Email")]
-    public class Email
+{   
+    public class EmailRequest
     {
-        [Key]
+        [JsonIgnore]
         public int Id { get; set; }
-        public string Pessoal{ get; set; }
+        public string Pessoal { get; set; }
         public string? Empresarial { get; set; }
+        [JsonIgnore]
         public int Id_Pessoa { get; set; }
+        [JsonIgnore]
         public virtual Pessoa? Pessoa { get; set; }
     }
 }

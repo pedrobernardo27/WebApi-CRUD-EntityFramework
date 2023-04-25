@@ -1,11 +1,12 @@
-﻿using CRUDWebApiEntityFrameworkRepository.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using CRUDWebApiEntityFrameworkRepository.Models;
 using CRUDWebApiEntityFrameworkRepository.Context;
 using CRUDWebApiEntityFrameworkRepository.Interfaces;
 
 namespace CRUDWebApiEntityFrameworkRepository.Repository
 {
     public class PessoaRepository : IPessoaRepository
-    { 
+    {
         public async ValueTask<IEnumerable<Pessoa>> Listar()
         {
             try
@@ -14,7 +15,7 @@ namespace CRUDWebApiEntityFrameworkRepository.Repository
 
                 using (var db = new EfExercicioModelContext())
                 {
-                    var query = from pes in db.Pessoa                                
+                    var query = from pes in db.Pessoa
                                 select new
                                 {
                                     Id = pes.Id,
@@ -93,26 +94,34 @@ namespace CRUDWebApiEntityFrameworkRepository.Repository
 
         public async ValueTask<Pessoa> Inserir(Pessoa pessoa)
         {
-            using (var db = new EfExercicioModelContext())
+            try
             {
-                db.Pessoa.Add(pessoa);
-                await db.SaveChangesAsync();
+                using (var db = new EfExercicioModelContext())
+                {
+                    db.Pessoa.Add(pessoa);
+                    await db.SaveChangesAsync();
+                }
             }
+            catch (Exception ex)
+            {
+
+                throw new Exception($"Erro{ex}");
+            }            
 
             return pessoa;
-        }
+        }                   
 
-        public async ValueTask<Pessoa> ObterPorId(int id)
+        public async ValueTask<Pessoa> ObterPessoaId(int id)
         {
             var pessoa = new Pessoa();
 
             using (var db = new EfExercicioModelContext())
             {
-                pessoa = await db.Pessoa.FindAsync(id);
+                pessoa = await db.Pessoa.FirstOrDefaultAsync(x => x.Id == id);
             }
 
             return pessoa;
-        }
+        }        
 
         public async ValueTask<Pessoa> Atualizar(Pessoa pessoa)
         {
@@ -124,18 +133,25 @@ namespace CRUDWebApiEntityFrameworkRepository.Repository
             }
 
             return pessoa;
-        }
+        }        
 
         public async ValueTask<Pessoa> Deletar(Pessoa pessoa)
         {
-            using (var db = new EfExercicioModelContext())
+            try
             {
-                db.Entry(pessoa).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
+                using (var db = new EfExercicioModelContext())
+                {
+                    db.Entry(pessoa).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
 
-                await db.SaveChangesAsync();
+                    await db.SaveChangesAsync();
+                }
+
+                return pessoa;
             }
-
-            return pessoa;
-        }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro.{ex}");
+            }            
+        }  
     }
 }

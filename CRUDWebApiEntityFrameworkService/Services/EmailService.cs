@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using CRUDWebApiEntityFrameworkRepository.Models;
 using CRUDWebApiEntityFrameworkService.Interfaces;
 
@@ -8,11 +9,13 @@ namespace CRUDWebApiEntityFrameworkService.Services
     {
         private readonly ILogger<EmailService> _logger;
         private readonly IEmailRepository _emailRepository;
+        private readonly IMapper _mapper;
 
-        public EmailService(ILogger<EmailService> logger, IEmailRepository emailRepository)
+        public EmailService(ILogger<EmailService> logger, IEmailRepository emailRepository, IMapper mapper)
         {
             _logger = logger;
             _emailRepository = emailRepository;
+            _mapper = mapper;
         }
         public async ValueTask<IEnumerable<EmailListarResponse>> ListarEmail()
         {
